@@ -21,8 +21,7 @@ const Register = () => {
 
 
   const submit = () => {
-    console.log("submit()");
-    // let usr = e.target[0].value;
+      // let usr = e.target[0].value;
     // let psw = e.target[2].value;
     let obj = {
       username: username,
@@ -38,7 +37,7 @@ const Register = () => {
       confirmpassword:confirmpassword,
 
     };
-    console.log(objdata);
+  
     validateInput(objdata);
    };
 
@@ -68,7 +67,7 @@ const Register = () => {
   
   const register = async (formData) => {
     setbuffer(true);
-    console.log("register()");
+    
     axios
       .post(config.endpoint+"/auth/register", formData)
       .then((response) => {
@@ -81,10 +80,10 @@ const Register = () => {
       }
       )
       .catch((err) => {
-        console.log(err);
+  
         if (err.response) {
           enqueueSnackbar("username is already taken",{variant:"error"});
-          console.log("username already e");
+          
         } else {
           enqueueSnackbar(
             "Something went wrong. Check that the backend is running, reachable and returns valid JSON."
@@ -155,7 +154,7 @@ const Register = () => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              console.log(e);
+          
               history.push("/login");
               check(e);
             }}

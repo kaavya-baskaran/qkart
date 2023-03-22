@@ -17,7 +17,7 @@ const Login = () => {
   const [buffer,setbuffer] = useState(false);
   const history = useHistory();
   const submit = () => {
-    console.log("submit()");
+  
     // let usr = e.target[0].value;
     // let psw = e.target[2].value;
     let obj = {
@@ -33,7 +33,7 @@ const Login = () => {
       password:password,
 
     };
-    console.log(objdata);
+  
     validateInput(objdata);
    };
   // TODO: CRIO_TASK_MODULE_LOGIN - Fetch the API response
@@ -67,7 +67,6 @@ const Login = () => {
       .post(config.endpoint+"/auth/login", formData).then((response) => {
         if(response.status === 201){
           enqueueSnackbar("Logged in successfully",{variant:"success"});
-          console.log(response);
           persistLogin(response.data.token,response.data.username,response.data.balance);
           setbuffer(false);
         }
@@ -160,7 +159,6 @@ const Login = () => {
         <form
             onSubmit={(e) => {
               e.preventDefault();
-              console.log(e);
               history.push("/");
               check(e);
             }}

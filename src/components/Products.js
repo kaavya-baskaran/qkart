@@ -13,11 +13,11 @@ import { config } from "../App";
 import Footer from "./Footer";
 import Header from "./Header";
 import "./Products.css";
-
+import ProductCard from "./ProductCard";
 // Definition of Data Structures used
 /**
  * @typedef {Object} Product - Data on product available to buy
- * 
+ *
  * @property {string} name - The name or title of the product
  * @property {string} category - The category that the product belongs to
  * @property {number} cost - The price to buy the product
@@ -26,9 +26,10 @@ import "./Products.css";
  * @property {string} _id - Unique ID for the product
  */
 
-
 const Products = () => {
-
+  const [prodarr, setprodarr] = useState([]);
+  const [loading, setloading] = useState(false);
+  const [emoji, setemoji] = useState(false);
   // TODO: CRIO_TASK_MODULE_PRODUCTS - Fetch products data and store it
   /**
    * Make API call to get the products list and store it to display the products
@@ -66,7 +67,21 @@ const Products = () => {
    *      "message": "Something went wrong. Check the backend console for more details"
    * }
    */
+  useEffect(() => {
+    performAPICall();
+  }, []);
   const performAPICall = async () => {
+    setloading(true);
+    axios
+      .get(config.endpoint + "/products")
+      .then((response) => {
+        setprodarr(response.data);
+        setloading(false);
+      })
+      .catch((error) => {
+        console.log("error at product detail fetching");
+        // Code for handling the error
+      });
   };
 
   // TODO: CRIO_TASK_MODULE_PRODUCTS - Implement search logic
@@ -84,6 +99,16 @@ const Products = () => {
    *
    */
   const performSearch = async (text) => {
+    setemoji(false);
+    const url = config.endpoint + "/products/search?value=" + text;
+    axios
+      .get(url)
+      .then((res) => {
+        setprodarr(res.data);
+      })
+      .catch((err) => {
+        setemoji(true);
+      });
   };
 
   // TODO: CRIO_TASK_MODULE_PRODUCTS - Optimise API calls with debounce search implementation
@@ -99,22 +124,31 @@ const Products = () => {
    *
    */
   const debounceSearch = (event, debounceTimeout) => {
+    setTimeout(() => {
+      performSearch(event.target.value);
+    }, debounceTimeout);
   };
-
-
-
-
-
-
 
   return (
     <div>
       <Header hasHiddenAuthButtons={true}>
         {/* TODO: CRIO_TASK_MODULE_PRODUCTS - Display search bar in the header for Products page */}
-
+        <TextField
+          className="search-desktop"
+          size="small"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Search color="primary" />
+              </InputAdornment>
+            ),
+          }}
+          placeholder="Search for items/categories"
+          name="search"
+          onChange={(event) => debounceSearch(event, 500)}
+        />
       </Header>
 
-      {/* Search view for mobiles */}
       <TextField
         className="search-mobile"
         size="small"
@@ -128,17 +162,88 @@ const Products = () => {
         }}
         placeholder="Search for items/categories"
         name="search"
+        onChange={(e) => debounceSearch(e, 500)}
       />
-       <Grid container>
-         <Grid item className="product-grid">
-           <Box className="hero">
-             <p className="hero-heading">
-               India’s <span className="hero-highlight">FASTEST DELIVERY</span>{" "}
-               to your door step
-             </p>
-           </Box>
-         </Grid>
-       </Grid>
+      {localStorage.getItem("username") ? (
+        <div>
+          <Grid container spacing={2}>
+            <Grid item className="product-grid">
+              <Box className="hero">
+                <p className="hero-heading">
+                  India’s{" "}
+                  <span className="hero-highlight">FASTEST DELIVERY</span> to
+                  your door step
+                </p>
+              </Box>
+
+              {loading ? (
+                <div className="loading">
+                  <CircularProgress className="loading"></CircularProgress>
+                  <h5>Loading Products...</h5>
+                </div>
+              ) : emoji ? (
+                <div className="loading">
+                  <SentimentDissatisfied />
+                  <h5>No products found</h5>
+                </div>
+              ) : (
+                <Grid container spacing={2} className="grid-container">
+                  {prodarr.map((product) => {
+                    return (
+                      <Grid item xs={6} md={3} key={product._id}>
+                        <ProductCard
+                          product={product}
+                          
+                        />
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              )}
+            </Grid>
+            
+          </Grid>
+        </div>
+      ) : (
+        <div>
+          <Grid container>
+            <Grid item className="product-grid">
+              <Box className="hero">
+                <p className="hero-heading">
+                  India’s{" "}
+                  <span className="hero-highlight">FASTEST DELIVERY</span> to
+                  your door step
+                </p>
+              </Box>
+            </Grid>
+            {loading ? (
+              <div className="loading">
+                <CircularProgress className="loading"></CircularProgress>
+                <h5>Loading Products...</h5>
+              </div>
+            ) : emoji ? (
+              <div className="loading">
+                <SentimentDissatisfied />
+                <h5>No products found</h5>
+              </div>
+            ) : (
+              <Grid container spacing={2} className="grid-container">
+                {prodarr.map((product) => {
+                  return (
+                    <Grid item xs={6} md={3} key={product._id}>
+                      <ProductCard
+                        product={product}
+                        
+                      />
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            )}
+          </Grid>
+        </div>
+      )}
+
       <Footer />
     </div>
   );
